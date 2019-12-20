@@ -26,7 +26,6 @@
 #include "caf/detail/int_list.hpp"
 #include "caf/detail/invoke_result_visitor.hpp"
 #include "caf/detail/pseudo_tuple.hpp"
-#include "caf/detail/try_match.hpp"
 #include "caf/detail/type_list.hpp"
 #include "caf/detail/type_traits.hpp"
 #include "caf/match_case.hpp"
@@ -130,9 +129,7 @@ public:
 
   match_case::result
   invoke(detail::invoke_result_visitor& f, type_erased_tuple& xs) override {
-    detail::meta_elements<pattern> ms;
-    // check if try_match() reports success
-    if (!detail::try_match(xs, ms.arr.data(), ms.arr.size()))
+    if (!xs.match_elements(pattern{}))
       return match_case::no_match;
     typename detail::il_indices<decayed_arg_types>::type indices;
     lfinvoker<std::is_same<result_type, void>::value, F> fun{fun_};

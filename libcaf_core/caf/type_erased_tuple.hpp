@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <tuple>
 #include <typeinfo>
+#include <utility>
 
 #include "caf/detail/apply_args.hpp"
 #include "caf/detail/core_export.hpp"
@@ -186,8 +187,9 @@ public:
   /// Returns `true` if the pattern `Ts...` matches the content of this tuple.
   template <class... Ts>
   bool match_elements() const noexcept {
+    std::make_index_sequence<sizeof...(Ts)> seq;
     detail::type_list<Ts...> tk;
-    return match_elements(tk);
+    return size() == sizeof...(Ts) && match_elements(tk, seq);
   }
 
   template <class F>
@@ -200,14 +202,23 @@ public:
   }
 
   /// @private
-  template <class T, class... Ts>
-  bool match_elements(detail::type_list<T, Ts...>) const noexcept {
-    detail::meta_elements<detail::type_list<T, Ts...>> xs;
-    return detail::try_match(*this, &xs.arr[0], 1 + sizeof...(Ts));
+  template <class... Ts>
+  bool match_elements(detail::type_list<Ts...> tk) const noexcept {
+    std::make_index_sequence<sizeof...(Ts)> seq;
+    return match_elements(tk, seq);
   }
 
   /// @private
-  inline bool match_elements(detail::type_list<>) const noexcept {
+  template <class Ts, size_t I, size_t... Is>
+  bool match_elements(Ts, std::index_sequence<I, Is...>) const noexcept {
+    using detail::tl_at_t;
+    return match_element<tl_at_t<Ts, I>>(I)
+           && (match_element<tl_at_t<Ts, Is>>(Is) && ...);
+  }
+
+  /// @private
+  bool match_elements(detail::type_list<>, std::index_sequence<>) const
+    noexcept {
     return empty();
   }
 

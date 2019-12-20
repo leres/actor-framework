@@ -44,8 +44,11 @@
 
 namespace caf {
 
-/// Used for request operations.
+/// Signals the receiver to add the operands to the current value.
 CAF_MSG_TYPE_ADD_ATOM(add_atom);
+
+/// Signals the receiver to subtract the operands from the current value.
+CAF_MSG_TYPE_ADD_ATOM(sub_atom);
 
 /// Used for request operations.
 CAF_MSG_TYPE_ADD_ATOM(get_atom);
@@ -145,6 +148,21 @@ CAF_MSG_TYPE_ADD_ATOM(stream_atom);
 
 /// Used to implement blocking_actor::wait_for.
 CAF_MSG_TYPE_ADD_ATOM(wait_for_atom);
+
+/// Can be used for testing or roundtrip time measurements in conjunction with
+/// `pong_atom`.`
+CAF_MSG_TYPE_ADD_ATOM(ping_atom);
+
+/// Can be used for testing or roundtrip time measurements in conjunction with
+/// `ping_atom`.`
+/// Used to implement blocking_actor::wait_for.
+CAF_MSG_TYPE_ADD_ATOM(pong_atom);
+
+/// Signals that a timer elapsed.
+CAF_MSG_TYPE_ADD_ATOM(timeout_atom);
+
+/// Requests to reset a timeout or resource.
+CAF_MSG_TYPE_ADD_ATOM(reset_atom);
 
 /// Compile-time list of all built-in types.
 /// @warning Types are sorted by uniform name.
@@ -289,5 +307,8 @@ template <class T>
 constexpr uint32_t make_type_token_from_list() {
   return make_type_token_from_list_helper<T>::value;
 }
+
+template <class T>
+constexpr uint16_t type_nr_v = type_nr<T>::value;
 
 } // namespace caf
